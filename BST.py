@@ -109,8 +109,23 @@ class Node:
             next.right = self.delete(next.right, temp.value)
         next.balance_tree()
         return next
+    def inorderSuccessor(self, key, root=None):
+        if self.right is not None:
+            return self.minValueNode(self.right)
+        successor = None
+        start = self
+        if root: start = root
+        while start is not None:
+            if key < start.value:
+                successor = start
+                start = start.left
+            elif key > start.value:
+                start = start.right
+            else:
+                break
+        return successor
     def inorder(self):
-         return f"{self.left.inorder() if self.left is not None else ''}{self.value},{self.right.inorder() if self.right is not None else ''}"
+        return f"{self.left.inorder() if self.left is not None else ''}{self.value},{self.right.inorder() if self.right is not None else ''}"
     def contains(self, value):
         if self.value == value: return True
         if value < self.value and self.left: return self.left.contains(value)
@@ -154,37 +169,61 @@ class Node:
         return self.print_tree(self)
 
 class BST:
-    def __init__(self):
+    def __init__(self, data=None):
         self.root = None
         self.count = 0
         self.min = 0
         self.max = 0
+        if data:
+            if type(data) in [list, tuple]:
+                for value in data:
+                    self.add(value)
+            else: raise Exception("invalid input data type")
     def add(self, value):
+        if type(value) not in [int, float]: raise Exception("invalid input data type")
         if self.root:
+            if self.contains(value): return
+            if value < self.min: self.min = value
+            if value > self.max: self.max = value
             self.root.add(value)
+            self.count += 1
         else:
             self.root = Node(value)
             self.count += 1
             self.min = value
             self.max = value
     def delete(self, key):
-        self.root = self.root.delete(self.root, key)
-    def contains(self, value):
+        if type(key) not in [int, float]: raise Exception("invalid input data type")
         if self.root:
-            return self.root.contains(value)
+            self.root = self.root.delete(self.root, key)
+            if not self.contains(key): self.count -= 1
+    def inorderSuccessor(self, key):
+        if type(key) not in [int, float]: raise Exception("invalid input data type")
+        node = self.root
+        while node is not None and node.value != key:
+            if key < node.value:
+                node = node.left
+            else:
+                node = node.right
+        successor = None
+        if node is None:
+            return None
+        if node.right is None and node.left is None:
+            successor = node.inorderSuccessor(key, self.root)
+        else: successor = node.inorderSuccessor(key)
+        return successor.value if successor is not None else None
+    def contains(self, value):
+        if type(value) not in [int, float]: raise Exception("invalid input data type")
+        return self.root.contains(value) if self.root else False
     def height(self):
-        return self.root.height
+        return self.root.height if self.root else 0
     def __str__(self):
-        return str(self.root)
+        return str(self.root) if self.root else ""
     def inorder(self):
-        return f"[{self.root.inorder()[:-1]}]"
+        return f"[{self.root.inorder()[:-1]}]" if self.root else "[]"
     
-tree = BST()
-for i in range(1,33):
-    tree.add(i)
-print(tree)
-tree.delete(24)
-print(tree)
+tree = BST([])
+# tree = BST()
 # tree.add(50)
 # tree.add(17)
 # tree.add(76)
@@ -195,7 +234,6 @@ print(tree)
 # tree.add(108)
 # tree.add(96)
 # tree.add(98)
-# print(tree)
-
-# tree.delete(107)
-# print(tree)
+print(tree)
+print(tree.inorder())
+print(tree.inorderSuccessor(98))
