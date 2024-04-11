@@ -69,18 +69,18 @@ class Node:
             if self.right.balance_factor() > 0:
                 self.right.rotate_right()
             self.rotate_left()
-    def add(self, value):
+    def add(self, value, balance):
         if value < self.value:
-            if self.left: self.left.add(value)
+            if self.left: self.left.add(value, balance)
             else: self.left = Node(value)
             if 1+self.left.height > self.height:
                 self.height = 1+self.left.height
         elif value > self.value:
-            if self.right: self.right.add(value)
+            if self.right: self.right.add(value, balance)
             else: self.right = Node(value)
             if 1+self.right.height > self.height:
                 self.height = 1+self.right.height
-        self.balance_tree()
+        if balance: self.balance_tree()
     def minValueNode(self, node):
         current = node
         while current.left is not None:
@@ -169,23 +169,27 @@ class Node:
         return self.print_tree(self)
 
 class BST:
-    def __init__(self, data=None):
+    def __init__(self, data=None, balance=True):
         self.root = None
         self.count = 0
         self.min = 0
         self.max = 0
+        self.balance = balance
         if data:
             if type(data) in [list, tuple]:
                 for value in data:
                     self.add(value)
             else: raise Exception("invalid input data type")
     def add(self, value):
-        if type(value) not in [int, float]: raise Exception("invalid input data type")
+        if type(value) in [list, tuple]:
+            for item in value:
+                self.add(item)
+        if type(value) not in [int, float]: raise Exception(f"invalid input data type: {type(value)}")
         if self.root:
             if self.contains(value): return
             if value < self.min: self.min = value
             if value > self.max: self.max = value
-            self.root.add(value)
+            self.root.add(value, balance=self.balance)
             self.count += 1
         else:
             self.root = Node(value)
@@ -194,9 +198,9 @@ class BST:
             self.max = value
     def delete(self, key):
         if type(key) not in [int, float]: raise Exception("invalid input data type")
-        if self.root:
+        if self.root and self.contains(key):
             self.root = self.root.delete(self.root, key)
-            if not self.contains(key): self.count -= 1
+            self.count -= 1
     def inorderSuccessor(self, key):
         if type(key) not in [int, float]: raise Exception("invalid input data type")
         node = self.root
@@ -222,18 +226,44 @@ class BST:
     def inorder(self):
         return f"[{self.root.inorder()[:-1]}]" if self.root else "[]"
     
-tree = BST([])
+import random
+import pickle as pkl
+
 # tree = BST()
-# tree.add(50)
-# tree.add(17)
-# tree.add(76)
-# tree.add(97)
-# tree.add(107)
-# tree.add(66)
-# tree.add(67)
-# tree.add(108)
-# tree.add(96)
-# tree.add(98)
-print(tree)
-print(tree.inorder())
-print(tree.inorderSuccessor(98))
+# for i in range(100):
+#     tree.add(i)
+
+# print("size,depth")
+# print(f"{tree.count},{tree.height()}")
+# while tree.root:
+#     node = tree.root
+#     while random.random() > 0.25:
+#         direction = random.random() < 0.5
+#         if direction and node.left: node = node.left
+#         elif node.right: node = node.right
+#         else: break
+#     tree.delete(node.value)
+#     print(f"{tree.count},{tree.height()}")
+
+
+import time as t
+
+# https://github.com/Ualabi/self_balancing_binary_search_tree
+from sbbst import sbbst
+
+run_time = 0
+i = 2
+# print("size,run_time")
+print("size,depth")
+while run_time < 60:
+    start_time = t.perf_counter()
+    tree = BST(balance=False)
+    for j in range(i):
+        num = random.randint(0, 1000000)
+        while tree.contains(num):
+            num = random.randint(0, 1000000)
+        tree.add(num)
+    run_time = t.perf_counter() - start_time
+    # print(f"{i},{run_time}")
+    print(f"{i},{tree.height()}")
+    i *= 2
