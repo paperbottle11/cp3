@@ -90,6 +90,24 @@ def getOpenIP():
             return ip
 
 if __name__ == "__main__":
+    # with open("log.txt", "r") as f:
+    #     log = f.readlines()
+    # nums = {}
+    # for line in log:
+    #     if line.strip() == "":
+    #         continue
+    #     words = line.strip().split(",")
+    #     words = [word.strip() for word in words]
+    #     if len(words) < 6 or len(words) > 8:
+    #         continue
+    #     if words[1] == "RECIEVING":
+    #         if words[3] not in nums:
+    #             nums[words[3]] = 0
+    #         nums[words[3]] += float(words[7])
+    # print("composite,time")
+    # for num in nums:
+    #     print(f"{num},{nums[num]}")
+    
     with open("composites.txt", "r") as f:
         composites = f.readlines()
     while composites:
@@ -113,5 +131,3 @@ if __name__ == "__main__":
     # client1 = FactorizationClient('34.71.161.175', 4321, 1)
     # # client1 = FactorizationClient('192.168.56.1', 4000, 1)
     # client1.start()
-
-    # 34.71.161.175 4321
